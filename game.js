@@ -374,17 +374,18 @@ class Enemy {
     constructor(type, x, y, level) {
         this.x = x; this.y = y; this.type = type; this.level = level;
         this.time = 0; this.startX = x; this.tier = getAlienTier(level);
-        const spdS = 1 + (level - 1) * 0.18;
-        const hpS = 1 + (level - 1) * 0.35;
+        // Gentler difficulty scaling: starts easy, ramps up gradually
+        const spdS = 0.6 + (level - 1) * 0.1;
+        const hpS = 0.8 + (level - 1) * 0.2;
         switch (type) {
-            case 'grunt': this.width = 30; this.height = 30; this.hp = Math.ceil(1 * hpS); this.speed = 1.5 * spdS; this.score = 10 * level; break;
-            case 'zigzag': this.width = 28; this.height = 28; this.hp = Math.ceil(2 * hpS); this.speed = 1.2 * spdS; this.score = 25 * level; this.amplitude = 50 + level * 6; break;
-            case 'charger': this.width = 24; this.height = 24; this.hp = Math.ceil(1 * hpS); this.speed = 2.5 * spdS; this.score = 30 * level; break;
-            case 'tank': this.width = 40; this.height = 40; this.hp = Math.ceil(5 * hpS); this.speed = 0.7 * spdS; this.score = 50 * level; this.shootTimer = 0; this.shootRate = Math.max(25, 75 - level * 5); break;
-            case 'sniper': this.width = 26; this.height = 32; this.hp = Math.ceil(2 * hpS); this.speed = 0.8 * spdS; this.score = 40 * level; this.shootTimer = 0; this.shootRate = Math.max(20, 65 - level * 5); break;
-            case 'splitter': this.width = 34; this.height = 34; this.hp = Math.ceil(3 * hpS); this.speed = 1.0 * spdS; this.score = 60 * level; this.hasSplit = false; break;
-            case 'swarm': this.width = 18; this.height = 18; this.hp = Math.ceil(1 * hpS); this.speed = 2.0 * spdS; this.score = 15 * level; break;
-            case 'boss': this.width = 90; this.height = 70; this.hp = Math.ceil(35 * hpS); this.maxHp = this.hp; this.speed = 0.5; this.score = 500 * level; this.shootTimer = 0; this.shootRate = Math.max(12, 45 - level * 3); this.phase = 0; this.phaseTimer = 0; break;
+            case 'grunt': this.width = 30; this.height = 30; this.hp = Math.ceil(1 * hpS); this.speed = 1.2 * spdS; this.score = 10 * level; break;
+            case 'zigzag': this.width = 28; this.height = 28; this.hp = Math.ceil(1.5 * hpS); this.speed = 1.0 * spdS; this.score = 25 * level; this.amplitude = 35 + level * 5; break;
+            case 'charger': this.width = 24; this.height = 24; this.hp = Math.ceil(1 * hpS); this.speed = 1.8 * spdS; this.score = 30 * level; break;
+            case 'tank': this.width = 40; this.height = 40; this.hp = Math.ceil(4 * hpS); this.speed = 0.5 * spdS; this.score = 50 * level; this.shootTimer = 0; this.shootRate = Math.max(35, 100 - level * 5); break;
+            case 'sniper': this.width = 26; this.height = 32; this.hp = Math.ceil(2 * hpS); this.speed = 0.6 * spdS; this.score = 40 * level; this.shootTimer = 0; this.shootRate = Math.max(30, 90 - level * 5); break;
+            case 'splitter': this.width = 34; this.height = 34; this.hp = Math.ceil(2.5 * hpS); this.speed = 0.8 * spdS; this.score = 60 * level; this.hasSplit = false; break;
+            case 'swarm': this.width = 18; this.height = 18; this.hp = Math.ceil(1 * hpS); this.speed = 1.5 * spdS; this.score = 15 * level; break;
+            case 'boss': this.width = 90; this.height = 70; this.hp = Math.ceil(25 * hpS); this.maxHp = this.hp; this.speed = 0.4; this.score = 500 * level; this.shootTimer = 0; this.shootRate = Math.max(20, 60 - level * 3); this.phase = 0; this.phaseTimer = 0; break;
         }
         this.maxHp = this.maxHp || this.hp;
     }
@@ -545,9 +546,9 @@ class Game {
         this.particles = new ParticleSystem();
         this.starField = new StarField();
         this.keys = {};
-        this.spawnTimer = 0; this.spawnRate = 55;
-        this.flyingPowerUpTimer = 0; this.flyingPowerUpRate = 420;
-        this.enemiesKilled = 0; this.enemiesForNextLevel = 15;
+        this.spawnTimer = 0; this.spawnRate = 90;
+        this.flyingPowerUpTimer = 0; this.flyingPowerUpRate = 350;
+        this.enemiesKilled = 0; this.enemiesForNextLevel = 10;
         this.bossSpawned = false;
         this.screenShake = 0; this.levelTransition = 0;
         this.comboCount = 0; this.comboTimer = 0;
@@ -570,9 +571,9 @@ class Game {
         this.player = new Player(selectedShip);
         this.bullets = []; this.enemyBullets = []; this.enemies = []; this.powerUps = [];
         this.particles = new ParticleSystem();
-        this.spawnTimer = 0; this.spawnRate = 55;
-        this.flyingPowerUpTimer = 0; this.flyingPowerUpRate = 420;
-        this.enemiesKilled = 0; this.enemiesForNextLevel = 15;
+        this.spawnTimer = 0; this.spawnRate = 90;
+        this.flyingPowerUpTimer = 0; this.flyingPowerUpRate = 350;
+        this.enemiesKilled = 0; this.enemiesForNextLevel = 10;
         this.bossSpawned = false;
         this.screenShake = 0; this.levelTransition = 0;
         this.comboCount = 0; this.comboTimer = 0;
@@ -896,8 +897,9 @@ class Game {
 
     levelUp() {
         this.level++; this.enemiesKilled = 0;
-        this.enemiesForNextLevel = 12 + this.level * 4;
-        this.spawnRate = Math.max(10, 50 - this.level * 4);
+        this.enemiesForNextLevel = 10 + this.level * 3;
+        // Gentler spawn rate decrease: starts at 90, decreases by 5 per level, min 20
+        this.spawnRate = Math.max(20, 90 - this.level * 5);
         this.bossSpawned = false; this.levelTransition = 120;
         audio.levelUpSound();
         this.waveWarning = `⚡ LEVEL ${this.level} ⚡`; this.waveWarningTimer = 150;

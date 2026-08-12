@@ -391,7 +391,7 @@
         <div id="touchControls">
             <div id="touchLeft" class="touch-btn touch-move">◀</div>
             <div id="touchRight" class="touch-btn touch-move">▶</div>
-            <div id="touchShoot" class="touch-btn touch-action">🔥</div>
+            <div id="touchShoot" class="touch-btn touch-action"></div>
             <div id="touchUlt1" class="touch-btn touch-ult" data-ult="1">⏳</div>
             <div id="touchUlt2" class="touch-btn touch-ult" data-ult="2">🔥</div>
             <div id="touchUlt3" class="touch-btn touch-ult" data-ult="3">🌀</div>
@@ -402,6 +402,14 @@
             <p>📲 Install this game on your device!</p>
             <button class="btn btn-small" id="installBtn">INSTALL</button>
             <button class="btn btn-small" id="dismissInstall" style="border-color:#666;color:#666;">LATER</button>
+        </div>
+    </div>
+
+    <!-- ROTATE SCREEN OVERLAY (mobile only, outside gameContainer) -->
+    <div id="rotateOverlay">
+        <div class="rotate-content">
+            <div class="rotate-icon">📱↻</div>
+            <p>Please rotate your device to landscape mode</p>
         </div>
     </div>
 
@@ -506,6 +514,65 @@
         /* Safe area for notched phones */
         @supports (padding: env(safe-area-inset-bottom)) {
             #touchControls { padding-bottom: env(safe-area-inset-bottom); }
+        }
+
+        /* ===== ROTATE SCREEN OVERLAY ===== */
+        #rotateOverlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: #000;
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .rotate-content {
+            text-align: center;
+            color: #0ff;
+            font-family: 'Courier New', monospace;
+        }
+        .rotate-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            animation: rotateAnim 2s ease-in-out infinite;
+        }
+        @keyframes rotateAnim {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(90deg); }
+        }
+        .rotate-content p {
+            font-size: 16px;
+            color: #0ff;
+            text-shadow: 0 0 10px #0ff;
+            max-width: 250px;
+            line-height: 1.5;
+        }
+
+        /* Show rotate overlay only on mobile in portrait */
+        @media (max-width: 850px) and (orientation: portrait) {
+            #rotateOverlay { display: flex !important; }
+            #gameContainer { display: none !important; }
+        }
+        @media (max-width: 850px) and (orientation: landscape) {
+            #rotateOverlay { display: none !important; }
+            #gameContainer { display: block !important; }
+            /* In landscape, make canvas fill the screen */
+            canvas {
+                width: 100vw !important;
+                height: 100vh !important;
+            }
+            #gameContainer { width: 100vw; height: 100vh; }
+            #touchControls { height: 100px; }
+            #touchLeft { bottom: 10px; left: 10px; width: 50px; height: 50px; }
+            #touchRight { bottom: 10px; left: 75px; width: 50px; height: 50px; }
+            #touchShoot { bottom: 10px; right: 10px; width: 70px; height: 70px; }
+            .touch-ult { width: 40px; height: 40px; font-size: 16px; top: 5px; }
+            #touchUlt1 { right: 110px; }
+            #touchUlt2 { right: 65px; }
+            #touchUlt3 { right: 15px; }
+            #muteBtn { bottom: 110px; }
         }
     </style>
 

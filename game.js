@@ -374,9 +374,9 @@ class Enemy {
     constructor(type, x, y, level) {
         this.x = x; this.y = y; this.type = type; this.level = level;
         this.time = 0; this.startX = x; this.tier = getAlienTier(level);
-        // Gentler difficulty scaling: starts easy, ramps up gradually
-        const spdS = 0.4 + (level - 1) * 0.06;
-        const hpS = 0.8 + (level - 1) * 0.15;
+        // Very gentle difficulty scaling: starts easy, ramps up gradually
+        const spdS = 0.3 + (level - 1) * 0.04;
+        const hpS = 0.6 + (level - 1) * 0.1;
         switch (type) {
             case 'grunt': this.width = 30; this.height = 30; this.hp = Math.ceil(1 * hpS); this.speed = 0.7 * spdS; this.score = 10 * level; break;
             case 'zigzag': this.width = 28; this.height = 28; this.hp = Math.ceil(1.5 * hpS); this.speed = 0.6 * spdS; this.score = 25 * level; this.amplitude = 25 + level * 4; break;

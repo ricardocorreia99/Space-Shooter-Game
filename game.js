@@ -21,10 +21,10 @@ const settings = {
 // SHIP CONFIGURATIONS
 // ============================================
 const SHIP_CONFIGS = {
-    fighter: { name: '⚡ Fighter', speed: 6, lives: 3, fireRate: 12, bulletDamage: 1, bulletSpeed: -11, color: '#0ff', accentColor: '#08f' },
-    tank: { name: '🛡️ Destroyer', speed: 3.5, lives: 5, fireRate: 20, bulletDamage: 2, bulletSpeed: -9, color: '#0f0', accentColor: '#080' },
-    speeder: { name: '💨 Phantom', speed: 9, lives: 2, fireRate: 6, bulletDamage: 1, bulletSpeed: -13, color: '#f0f', accentColor: '#80f' },
-    balanced: { name: '🎯 Vanguard', speed: 5.5, lives: 4, fireRate: 10, bulletDamage: 1.5, bulletSpeed: -10, color: '#ff8', accentColor: '#f80' }
+    fighter: { name: '⚡ Fighter', speed: 2.8, lives: 3, fireRate: 18, bulletDamage: 1, bulletSpeed: -4.5, color: '#0ff', accentColor: '#08f' },
+    tank: { name: '🛡️ Destroyer', speed: 1.8, lives: 5, fireRate: 26, bulletDamage: 2, bulletSpeed: -3.8, color: '#0f0', accentColor: '#080' },
+    speeder: { name: '💨 Phantom', speed: 4, lives: 2, fireRate: 12, bulletDamage: 1, bulletSpeed: -5.5, color: '#f0f', accentColor: '#80f' },
+    balanced: { name: '🎯 Vanguard', speed: 2.5, lives: 4, fireRate: 16, bulletDamage: 1.5, bulletSpeed: -4, color: '#ff8', accentColor: '#f80' }
 };
 
 let selectedShip = 'fighter';
@@ -36,17 +36,17 @@ const ULTIMATES = {
     timeWarp: {
         key: 'Digit1', name: 'Time Warp', icon: '⏳', color: '#a0f',
         description: 'Slows all enemies & bullets',
-        unlockScore: 500, cooldown: 1200, duration: 300 // 20s cooldown, 5s duration
+        unlockScore: 500, cooldown: 900, duration: 600 // 15s cooldown, 10s duration
     },
     plasmaBeam: {
         key: 'Digit2', name: 'Plasma Beam', icon: '🔥', color: '#f80',
         description: 'Devastating vertical beam',
-        unlockScore: 2000, cooldown: 1500, duration: 90 // 25s cooldown, 1.5s duration
+        unlockScore: 2000, cooldown: 1100, duration: 240 // 18s cooldown, 4s duration
     },
     vortex: {
         key: 'Digit3', name: 'Vortex', icon: '🌀', color: '#80f',
         description: 'Black hole pulls & damages enemies',
-        unlockScore: 5000, cooldown: 1800, duration: 240 // 30s cooldown, 4s duration
+        unlockScore: 5000, cooldown: 1200, duration: 480 // 20s cooldown, 8s duration
     }
 };
 
@@ -304,14 +304,14 @@ class Player {
                 bullets.push({ x: this.x + 8, y: this.y - 20, vx: 0, vy: bSpeed, damage: dmg }); break;
             case 2:
                 bullets.push({ x: this.x, y: this.y - 20, vx: 0, vy: bSpeed, damage: dmg });
-                bullets.push({ x: this.x - 12, y: this.y - 15, vx: -1, vy: bSpeed, damage: dmg });
-                bullets.push({ x: this.x + 12, y: this.y - 15, vx: 1, vy: bSpeed, damage: dmg }); break;
+                bullets.push({ x: this.x - 12, y: this.y - 15, vx: -0.6, vy: bSpeed, damage: dmg });
+                bullets.push({ x: this.x + 12, y: this.y - 15, vx: 0.6, vy: bSpeed, damage: dmg }); break;
             default:
                 bullets.push({ x: this.x, y: this.y - 20, vx: 0, vy: bSpeed, damage: dmg });
-                bullets.push({ x: this.x - 10, y: this.y - 17, vx: -1.5, vy: bSpeed, damage: dmg });
-                bullets.push({ x: this.x + 10, y: this.y - 17, vx: 1.5, vy: bSpeed, damage: dmg });
-                bullets.push({ x: this.x - 18, y: this.y - 12, vx: -3, vy: bSpeed * 0.9, damage: dmg });
-                bullets.push({ x: this.x + 18, y: this.y - 12, vx: 3, vy: bSpeed * 0.9, damage: dmg }); break;
+                bullets.push({ x: this.x - 10, y: this.y - 17, vx: -0.8, vy: bSpeed, damage: dmg });
+                bullets.push({ x: this.x + 10, y: this.y - 17, vx: 0.8, vy: bSpeed, damage: dmg });
+                bullets.push({ x: this.x - 18, y: this.y - 12, vx: -1.5, vy: bSpeed * 0.9, damage: dmg });
+                bullets.push({ x: this.x + 18, y: this.y - 12, vx: 1.5, vy: bSpeed * 0.9, damage: dmg }); break;
         }
         return bullets;
     }
@@ -375,17 +375,17 @@ class Enemy {
         this.x = x; this.y = y; this.type = type; this.level = level;
         this.time = 0; this.startX = x; this.tier = getAlienTier(level);
         // Gentler difficulty scaling: starts easy, ramps up gradually
-        const spdS = 0.6 + (level - 1) * 0.1;
-        const hpS = 0.8 + (level - 1) * 0.2;
+        const spdS = 0.4 + (level - 1) * 0.06;
+        const hpS = 0.8 + (level - 1) * 0.15;
         switch (type) {
-            case 'grunt': this.width = 30; this.height = 30; this.hp = Math.ceil(1 * hpS); this.speed = 1.2 * spdS; this.score = 10 * level; break;
-            case 'zigzag': this.width = 28; this.height = 28; this.hp = Math.ceil(1.5 * hpS); this.speed = 1.0 * spdS; this.score = 25 * level; this.amplitude = 35 + level * 5; break;
-            case 'charger': this.width = 24; this.height = 24; this.hp = Math.ceil(1 * hpS); this.speed = 1.8 * spdS; this.score = 30 * level; break;
-            case 'tank': this.width = 40; this.height = 40; this.hp = Math.ceil(4 * hpS); this.speed = 0.5 * spdS; this.score = 50 * level; this.shootTimer = 0; this.shootRate = Math.max(35, 100 - level * 5); break;
-            case 'sniper': this.width = 26; this.height = 32; this.hp = Math.ceil(2 * hpS); this.speed = 0.6 * spdS; this.score = 40 * level; this.shootTimer = 0; this.shootRate = Math.max(30, 90 - level * 5); break;
-            case 'splitter': this.width = 34; this.height = 34; this.hp = Math.ceil(2.5 * hpS); this.speed = 0.8 * spdS; this.score = 60 * level; this.hasSplit = false; break;
-            case 'swarm': this.width = 18; this.height = 18; this.hp = Math.ceil(1 * hpS); this.speed = 1.5 * spdS; this.score = 15 * level; break;
-            case 'boss': this.width = 90; this.height = 70; this.hp = Math.ceil(25 * hpS); this.maxHp = this.hp; this.speed = 0.4; this.score = 500 * level; this.shootTimer = 0; this.shootRate = Math.max(20, 60 - level * 3); this.phase = 0; this.phaseTimer = 0; break;
+            case 'grunt': this.width = 30; this.height = 30; this.hp = Math.ceil(1 * hpS); this.speed = 0.7 * spdS; this.score = 10 * level; break;
+            case 'zigzag': this.width = 28; this.height = 28; this.hp = Math.ceil(1.5 * hpS); this.speed = 0.6 * spdS; this.score = 25 * level; this.amplitude = 25 + level * 4; break;
+            case 'charger': this.width = 24; this.height = 24; this.hp = Math.ceil(1 * hpS); this.speed = 1.0 * spdS; this.score = 30 * level; break;
+            case 'tank': this.width = 40; this.height = 40; this.hp = Math.ceil(4 * hpS); this.speed = 0.3 * spdS; this.score = 50 * level; this.shootTimer = 0; this.shootRate = Math.max(50, 120 - level * 5); break;
+            case 'sniper': this.width = 26; this.height = 32; this.hp = Math.ceil(2 * hpS); this.speed = 0.35 * spdS; this.score = 40 * level; this.shootTimer = 0; this.shootRate = Math.max(45, 110 - level * 5); break;
+            case 'splitter': this.width = 34; this.height = 34; this.hp = Math.ceil(2.5 * hpS); this.speed = 0.5 * spdS; this.score = 60 * level; this.hasSplit = false; break;
+            case 'swarm': this.width = 18; this.height = 18; this.hp = Math.ceil(1 * hpS); this.speed = 0.9 * spdS; this.score = 15 * level; break;
+            case 'boss': this.width = 90; this.height = 70; this.hp = Math.ceil(25 * hpS); this.maxHp = this.hp; this.speed = 0.25; this.score = 500 * level; this.shootTimer = 0; this.shootRate = Math.max(30, 80 - level * 3); this.phase = 0; this.phaseTimer = 0; break;
         }
         this.maxHp = this.maxHp || this.hp;
     }
@@ -394,7 +394,7 @@ class Enemy {
         switch (this.type) {
             case 'grunt': this.y += this.speed; this.x += Math.sin(this.time * 0.03) * 0.5; break;
             case 'zigzag': this.y += this.speed; this.x = this.startX + Math.sin(this.time * 0.05) * this.amplitude; break;
-            case 'charger': this.y += this.speed; if (this.time > 20) this.speed += 0.06; this.x += Math.sin(this.time * 0.1) * 1.5; break;
+            case 'charger': this.y += this.speed; if (this.time > 40) this.speed += 0.015; this.x += Math.sin(this.time * 0.08) * 0.6; break;
             case 'tank': this.y += this.speed; this.shootTimer++; break;
             case 'sniper': this.y += this.speed; if (this.y > 80 && this.y < 180) this.speed = 0.15; this.shootTimer++; break;
             case 'splitter': this.y += this.speed; this.x += Math.sin(this.time * 0.04) * 1.2; break;
@@ -423,7 +423,7 @@ class Enemy {
     }
     getBullets(px, py) {
         const bullets = [];
-        const bs = 3 + this.level * 0.35;
+        const bs = 1.2 + this.level * 0.12;
         if (this.type === 'boss') {
             if (this.phase === 0) { for (let i = -2; i <= 2; i++) bullets.push({ x: this.x + i * 15, y: this.y + 35, vx: i * 1.5, vy: bs + 1 }); }
             else if (this.phase === 1) { const dx = px - this.x, dy = py - this.y, d = Math.sqrt(dx * dx + dy * dy), s = bs + 2; bullets.push({ x: this.x, y: this.y + 35, vx: (dx / d) * s, vy: (dy / d) * s }); bullets.push({ x: this.x - 20, y: this.y + 30, vx: (dx / d) * s - 0.5, vy: (dy / d) * s }); bullets.push({ x: this.x + 20, y: this.y + 30, vx: (dx / d) * s + 0.5, vy: (dy / d) * s }); }
@@ -499,13 +499,13 @@ class PowerUp {
         this.flying = flying || false;
         if (this.flying) {
             // Flying power-ups move in a wave pattern across the screen
-            this.vx = (Math.random() < 0.5 ? 1 : -1) * (2 + Math.random() * 2);
-            this.vy = 0.5 + Math.random() * 1;
+            this.vx = (Math.random() < 0.5 ? 1 : -1) * (0.7 + Math.random() * 0.7);
+            this.vy = 0.2 + Math.random() * 0.3;
             this.amplitude = 30 + Math.random() * 40;
             this.freq = 0.03 + Math.random() * 0.02;
             this.startY = y;
         } else {
-            this.vx = 0; this.vy = 2;
+            this.vx = 0; this.vy = 1.2;
         }
     }
     update() {
@@ -753,41 +753,31 @@ class Game {
         // === PLASMA BEAM EFFECT: damage all enemies in a vertical column ===
         if (this.plasmaBeamActive) {
             const beamX = this.player.x;
-            const beamWidth = 50;
+            const beamWidth = 60;
             this.enemies.forEach(e => {
                 if (Math.abs(e.x - beamX) < beamWidth) {
-                    e.hp -= 0.5; // Continuous damage
-                    if (Math.random() < 0.3) this.particles.sparkle(e.x, e.y, '#f80');
+                    e.hp -= 0.8; // Strong continuous damage
+                    if (Math.random() < 0.4) this.particles.sparkle(e.x, e.y, '#f80');
                 }
             });
-            // Also destroy enemy bullets in the beam
-            this.enemyBullets = this.enemyBullets.filter(b => Math.abs(b.x - beamX) > beamWidth / 2);
+            // Enemy bullets are NOT affected by the plasma beam
         }
 
-        // === VORTEX EFFECT: pull enemies toward center and damage them ===
+        // === VORTEX EFFECT: pull enemies toward center and damage them (bullets unaffected) ===
         if (this.vortexActive) {
             const vx = this.vortexX, vy = this.vortexY;
-            const pullRadius = 200;
+            const pullRadius = 250;
             this.enemies.forEach(e => {
                 const dx = vx - e.x, dy = vy - e.y;
                 const dist = Math.sqrt(dx * dx + dy * dy);
                 if (dist < pullRadius && dist > 5) {
-                    const force = (pullRadius - dist) / pullRadius * 3;
+                    const force = (pullRadius - dist) / pullRadius * 4;
                     e.x += (dx / dist) * force;
                     e.y += (dy / dist) * force;
-                    if (dist < 40) e.hp -= 0.3; // Damage when close to center
+                    if (dist < 60) e.hp -= 0.5; // Stronger damage when close to center
                 }
             });
-            // Also pull enemy bullets
-            this.enemyBullets.forEach(b => {
-                const dx = vx - b.x, dy = vy - b.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                if (dist < pullRadius && dist > 5) {
-                    const force = (pullRadius - dist) / pullRadius * 2;
-                    b.vx += (dx / dist) * force * 0.1;
-                    b.vy += (dy / dist) * force * 0.1;
-                }
-            });
+            // Enemy bullets are NOT affected by the vortex
             if (Math.random() < 0.5) this.particles.emit(vx + (Math.random() - 0.5) * 60, vy + (Math.random() - 0.5) * 60, 1, ['#80f', '#a0f', '#60f'], 1, 15);
         }
     }
@@ -995,7 +985,16 @@ class Game {
         this.floatingTexts = this.floatingTexts.filter(t => { t.y -= 1; t.life--; return t.life > 0; });
         if (this.keys['Space']) this.bullets.push(...this.player.shoot());
         this.bullets = this.bullets.filter(b => { b.x += b.vx; b.y += b.vy; return b.y > -10 && b.x > -10 && b.x < W + 10; });
-        this.enemyBullets = this.enemyBullets.filter(b => { b.x += b.vx; b.y += b.vy; return b.y < H + 10 && b.y > -10 && b.x > -10 && b.x < W + 10; });
+        // Move enemy bullets - apply time warp slow without changing their stored velocity
+        const bulletTimeScale = this.timeWarpActive ? 0.3 : 1;
+        this.enemyBullets = this.enemyBullets.filter(b => {
+            // Store original velocity if not yet stored
+            if (b.origVx === undefined) { b.origVx = b.vx; b.origVy = b.vy; }
+            // Always use original velocity for movement direction, apply time scale
+            b.x += b.origVx * bulletTimeScale;
+            b.y += b.origVy * bulletTimeScale;
+            return b.y < H + 10 && b.y > -10 && b.x > -10 && b.x < W + 10;
+        });
         if (this.levelTransition <= 0) { this.spawnTimer++; if (this.spawnTimer >= this.spawnRate) { this.spawnTimer = 0; this.spawnEnemy(); } }
         // Spawn flying power-ups periodically
         this.flyingPowerUpTimer++;
@@ -1013,18 +1012,20 @@ class Game {
             if (!fromLeft) pu.vx = -Math.abs(pu.vx); else pu.vx = Math.abs(pu.vx);
             this.powerUps.push(pu);
         }
-        // Time warp: slow enemy movement and bullets
+        // Time warp: slow enemy movement and bullets (bullets keep original velocity stored)
         const timeScale = this.timeWarpActive ? 0.3 : 1;
         this.enemies.forEach(e => {
             const origSpeed = e.speed;
             e.speed *= timeScale;
             e.update(this.player.x);
             e.speed = origSpeed;
-            if (e.canShoot()) this.enemyBullets.push(...e.getBullets(this.player.x, this.player.y));
+            if (e.canShoot()) {
+                const newBullets = e.getBullets(this.player.x, this.player.y);
+                // Store original velocity so we can restore after time warp ends
+                newBullets.forEach(b => { b.origVx = b.vx; b.origVy = b.vy; });
+                this.enemyBullets.push(...newBullets);
+            }
         });
-        if (this.timeWarpActive) {
-            this.enemyBullets.forEach(b => { b.vx *= 0.97; b.vy *= 0.97; });
-        }
         this.enemies = this.enemies.filter(e => !e.isOffScreen());
         this.powerUps = this.powerUps.filter(p => { p.update(); return !p.isOffScreen(); });
         this.checkCollisions();
@@ -1162,9 +1163,13 @@ document.getElementById('resumeBtn').addEventListener('click', () => game.resume
 document.getElementById('pauseHomeBtn').addEventListener('click', () => game.goHome());
 document.getElementById('muteBtn').addEventListener('click', () => audio.toggle());
 
-// Quit buttons
+// Quit buttons - close the app/tab entirely
 function quitGame() {
-    game.state = 'menu'; audio.stopMusic();
+    audio.stopMusic();
+    // Try to close the window/tab (works for PWA and windows opened by script)
+    window.close();
+    // Fallback: if window.close() doesn't work (browser restriction), show goodbye message
+    game.state = 'menu';
     document.getElementById('pauseMenu').style.display = 'none';
     document.getElementById('pauseBtn').style.display = 'none';
     document.getElementById('homeScreen').classList.remove('hidden');
@@ -1187,6 +1192,17 @@ function setupToggle(id, settingKey) {
 setupToggle('toggleParticles', 'particlesEnabled');
 setupToggle('toggleShake', 'screenShakeEnabled');
 
-// Game loop
-function gameLoop() { game.update(); game.draw(); requestAnimationFrame(gameLoop); }
-game.starField.update(); game.draw(); gameLoop();
+// Game loop - capped at 55fps for proper speed
+const TARGET_FPS = 55;
+const FRAME_INTERVAL = 1000 / TARGET_FPS;
+let lastFrameTime = 0;
+
+function gameLoop(timestamp) {
+    requestAnimationFrame(gameLoop);
+    const elapsed = timestamp - lastFrameTime;
+    if (elapsed < FRAME_INTERVAL) return;
+    lastFrameTime = timestamp - (elapsed % FRAME_INTERVAL);
+    game.update();
+    game.draw();
+}
+game.starField.update(); game.draw(); requestAnimationFrame(gameLoop);

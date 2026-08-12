@@ -1,5 +1,5 @@
 // Service Worker for Retro Space Shooter PWA
-const CACHE_NAME = 'space-shooter-v2';
+const CACHE_NAME = 'space-shooter-v3';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -43,15 +43,12 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Fetch: serve from cache first, fallback to network
+// Fetch: network first, fallback to cache (ensures latest version when online)
 self.addEventListener('fetch', (event) => {
     event.respondWith(
-        caches.match(event.request).then((cachedResponse) => {
-            if (cachedResponse) {
-                return cachedResponse;
-            }
-            return fetch(event.request).then((response) => {
-                // Cache new resources dynamically
+        fetch(event.request)
+            .then((response) => {
+                // Update cache with fresh response
                 if (response.status === 200) {
                     const responseClone = response.clone();
                     caches.open(CACHE_NAME).then((cache) => {
@@ -59,12 +56,18 @@ self.addEventListener('fetch', (event) => {
                     });
                 }
                 return response;
-            }).catch(() => {
-                // Offline fallback
-                if (event.request.destination === 'document') {
-                    return caches.match('./index.html');
-                }
-            });
-        })
+            })
+            .catch(() => {
+                // Offline: serve from cache
+                return caches.match(event.request).then((cachedResponse) => {
+                    if (cachedResponse) {
+                        return cachedResponse;
+                    }
+                    // Final fallback for navigation requests
+                    if (event.request.destination === 'document') {
+                        return caches.match('./index.html');
+                    }
+                });
+            })
     );
 });

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head><title>Generate PWA Icons</title></head>
+<body style="background:#222;color:#fff;font-family:monospace;padding:20px;">
+<h2>PWA Icon Generator</h2>
+<p>Click the button to generate and download all required icons.</p>
+<button onclick="generateAll()" style="padding:10px 20px;font-size:16px;cursor:pointer;">Generate Icons</button>
+<div id="output" style="margin-top:20px;"></div>
+<script>
+const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+
+function drawIcon(size) {
+    const c = document.createElement('canvas');
+    c.width = size; c.height = size;
+    const ctx = c.getContext('2d');
+    
+    // Background
+    ctx.fillStyle = '#0a0a2a';
+    ctx.fillRect(0, 0, size, size);
+    
+    // Outer glow ring
+    const gradient = ctx.createRadialGradient(size/2, size/2, size*0.2, size/2, size/2, size*0.48);
+    gradient.addColorStop(0, 'rgba(0,255,255,0.1)');
+    gradient.addColorStop(1, 'rgba(0,255,255,0.3)');
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.arc(size/2, size/2, size*0.45, 0, Math.PI*2);
+    ctx.fill();
+    
+    // Ship
+    const s = size * 0.35;
+    const cx = size/2, cy = size/2;
+    
+    ctx.fillStyle = '#0ff';
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - s);
+    ctx.lineTo(cx - s*0.6, cy + s*0.6);
+    ctx.lineTo(cx - s*0.2, cy + s*0.4);
+    ctx.lineTo(cx, cy + s*0.6);
+    ctx.lineTo(cx + s*0.2, cy + s*0.4);
+    ctx.lineTo(cx + s*0.6, cy + s*0.6);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Cockpit
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(cx - s*0.1, cy - s*0.3, s*0.2, s*0.3);
+    
+    // Engine glow
+    ctx.fillStyle = '#08f';
+    ctx.fillRect(cx - s*0.7, cy + s*0.35, s*0.25, s*0.15);
+    ctx.fillRect(cx + s*0.45, cy + s*0.35, s*0.25, s*0.15);
+    
+    // Stars
+    ctx.fillStyle = '#fff';
+    for (let i = 0; i < 8; i++) {
+        const sx = (Math.sin(i*2.5)*0.35 + 0.5) * size;
+        const sy = (Math.cos(i*3.1)*0.35 + 0.5) * size;
+        const ss = size * 0.01 + 1;
+        ctx.fillRect(sx, sy, ss, ss);
+    }
+    
+    return c;
+}
+
+function generateAll() {
+    const output = document.getElementById('output');
+    output.innerHTML = '<p>Right-click each image and "Save As" to the <code>icons/</code> folder:</p>';
+    
+    sizes.forEach(size => {
+        const canvas = drawIcon(size);
+        const img = document.createElement('img');
+        img.src = canvas.toDataURL('image/png');
+        img.style.margin = '5px';
+        img.style.border = '1px solid #555';
+        
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/png');
+        link.download = `icon-${size}.png`;
+        link.textContent = `icon-${size}.png`;
+        link.style.color = '#0ff';
+        link.style.marginRight = '15px';
+        
+        const div = document.createElement('div');
+        div.style.display = 'inline-block';
+        div.style.margin = '10px';
+        div.style.textAlign = 'center';
+        div.appendChild(img);
+        div.appendChild(document.createElement('br'));
+        div.appendChild(link);
+        output.appendChild(div);
+    });
+    
+    output.innerHTML += '<p style="color:#0f0;margin-top:20px;">✓ All icons generated! Click each link to download, then place in the <code>icons/</code> folder.</p>';
+}
+</script>
+</body>
+</html>

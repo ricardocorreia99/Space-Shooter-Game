@@ -389,8 +389,11 @@
 
         <!-- MOBILE TOUCH CONTROLS (hidden on desktop) -->
         <div id="touchControls">
-            <div id="touchLeft" class="touch-btn touch-move">◀</div>
-            <div id="touchRight" class="touch-btn touch-move">▶</div>
+            <div id="joystickZone">
+                <div id="joystickBase">
+                    <div id="joystickKnob"></div>
+                </div>
+            </div>
             <div id="touchShoot" class="touch-btn touch-action"></div>
             <div id="touchUlt1" class="touch-btn touch-ult" data-ult="1">⏳</div>
             <div id="touchUlt2" class="touch-btn touch-ult" data-ult="2">🔥</div>
@@ -445,8 +448,39 @@
             border-color: #0ff;
             box-shadow: 0 0 15px #0ff;
         }
-        #touchLeft { bottom: 20px; left: 20px; }
-        #touchRight { bottom: 20px; left: 100px; }
+        /* Joystick */
+        #joystickZone {
+            position: absolute;
+            bottom: 10px; left: 10px;
+            width: 120px; height: 120px;
+            pointer-events: all;
+            touch-action: none;
+        }
+        #joystickBase {
+            position: relative;
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            background: rgba(0, 255, 255, 0.08);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #joystickKnob {
+            width: 50px; height: 50px;
+            border-radius: 50%;
+            background: rgba(0, 255, 255, 0.3);
+            border: 2px solid rgba(0, 255, 255, 0.6);
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            transition: none;
+        }
+        #joystickKnob.active {
+            background: rgba(0, 255, 255, 0.5);
+            border-color: #0ff;
+            box-shadow: 0 0 15px #0ff;
+        }
         #touchShoot { bottom: 20px; right: 20px; width: 80px; height: 80px; font-size: 30px; background: rgba(255, 100, 0, 0.2); border-color: rgba(255, 100, 0, 0.5); color: #f80; }
         #touchShoot:active, #touchShoot.pressed { background: rgba(255, 100, 0, 0.5); border-color: #f80; box-shadow: 0 0 15px #f80; }
         .touch-ult { width: 44px; height: 44px; font-size: 18px; top: 10px; background: rgba(160, 0, 255, 0.15); border-color: rgba(160, 0, 255, 0.4); }
@@ -558,21 +592,26 @@
         @media (max-width: 850px) and (orientation: landscape) {
             #rotateOverlay { display: none !important; }
             #gameContainer { display: block !important; }
-            /* In landscape, make canvas fill the screen */
+            /* In landscape, make canvas fill the entire screen */
             canvas {
                 width: 100vw !important;
                 height: 100vh !important;
+                border: none !important;
+                box-shadow: none !important;
             }
             #gameContainer { width: 100vw; height: 100vh; }
-            #touchControls { height: 100px; }
-            #touchLeft { bottom: 10px; left: 10px; width: 50px; height: 50px; }
-            #touchRight { bottom: 10px; left: 75px; width: 50px; height: 50px; }
+            #touchControls { height: 130px; }
+            /* Joystick in landscape */
+            #joystickZone { bottom: 5px; left: 5px; width: 110px; height: 110px; }
+            #joystickBase { width: 110px; height: 110px; }
+            #joystickKnob { width: 45px; height: 45px; }
             #touchShoot { bottom: 10px; right: 10px; width: 70px; height: 70px; }
             .touch-ult { width: 40px; height: 40px; font-size: 16px; top: 5px; }
             #touchUlt1 { right: 110px; }
             #touchUlt2 { right: 65px; }
             #touchUlt3 { right: 15px; }
-            #muteBtn { bottom: 110px; }
+            #muteBtn { display: none; }
+            #pauseBtn { top: 5px; right: 5px; }
         }
     </style>
 
@@ -615,29 +654,91 @@
         if (isMobile) {
             document.getElementById('touchControls').style.display = 'flex';
 
-            // Auto-shoot on mobile
-            let autoShoot = false;
+            // ===== VIRTUAL JOYSTICK =====
+            const joystickZone = document.getElementById('joystickZone');
+            const joystickBase = document.getElementById('joystickBase');
+            const joystickKnob = document.getElementById('joystickKnob');
+            let joystickActive = false;
+            let joystickTouchId = null;
+            let joystickCenterX = 0;
+            let joystickCenterY = 0;
+            const joystickRadius = 35; // max distance knob can move
 
-            function setupTouchBtn(id, keyCode, isToggle) {
-                const btn = document.getElementById(id);
-                btn.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    btn.classList.add('pressed');
-                    if (typeof game !== 'undefined') game.keys[keyCode] = true;
-                }, { passive: false });
-                btn.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    btn.classList.remove('pressed');
-                    if (typeof game !== 'undefined') game.keys[keyCode] = false;
-                }, { passive: false });
-                btn.addEventListener('touchcancel', (e) => {
-                    btn.classList.remove('pressed');
-                    if (typeof game !== 'undefined') game.keys[keyCode] = false;
-                });
+            function getJoystickCenter() {
+                const rect = joystickBase.getBoundingClientRect();
+                joystickCenterX = rect.left + rect.width / 2;
+                joystickCenterY = rect.top + rect.height / 2;
             }
 
-            setupTouchBtn('touchLeft', 'ArrowLeft');
-            setupTouchBtn('touchRight', 'ArrowRight');
+            joystickZone.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (joystickActive) return;
+                const touch = e.changedTouches[0];
+                joystickTouchId = touch.identifier;
+                joystickActive = true;
+                joystickKnob.classList.add('active');
+                getJoystickCenter();
+                updateJoystick(touch.clientX, touch.clientY);
+            }, { passive: false });
+
+            joystickZone.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!joystickActive) return;
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === joystickTouchId) {
+                        updateJoystick(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
+                        break;
+                    }
+                }
+            }, { passive: false });
+
+            joystickZone.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === joystickTouchId) {
+                        resetJoystick();
+                        break;
+                    }
+                }
+            }, { passive: false });
+
+            joystickZone.addEventListener('touchcancel', () => { resetJoystick(); });
+
+            function updateJoystick(touchX, touchY) {
+                let dx = touchX - joystickCenterX;
+                let dy = touchY - joystickCenterY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                // Clamp to radius
+                if (dist > joystickRadius) {
+                    dx = (dx / dist) * joystickRadius;
+                    dy = (dy / dist) * joystickRadius;
+                }
+                // Move knob visually
+                joystickKnob.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+                // Calculate normalized direction (-1 to 1)
+                const nx = dx / joystickRadius;
+                const ny = dy / joystickRadius;
+                // Apply to game keys with deadzone of 0.2
+                if (typeof game !== 'undefined') {
+                    game.keys['ArrowLeft'] = nx < -0.2;
+                    game.keys['ArrowRight'] = nx > 0.2;
+                    game.keys['ArrowUp'] = ny < -0.2;
+                    game.keys['ArrowDown'] = ny > 0.2;
+                }
+            }
+
+            function resetJoystick() {
+                joystickActive = false;
+                joystickTouchId = null;
+                joystickKnob.classList.remove('active');
+                joystickKnob.style.transform = 'translate(-50%, -50%)';
+                if (typeof game !== 'undefined') {
+                    game.keys['ArrowLeft'] = false;
+                    game.keys['ArrowRight'] = false;
+                    game.keys['ArrowUp'] = false;
+                    game.keys['ArrowDown'] = false;
+                }
+            }
 
             // Shoot button - hold to auto-fire
             const shootBtn = document.getElementById('touchShoot');

@@ -1,12 +1,18 @@
 // Service Worker for Retro Space Shooter PWA
-const CACHE_NAME = 'space-shooter-v1';
+const CACHE_NAME = 'space-shooter-v2';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './game.js',
     './manifest.json',
-    './icons/icon-192.png',
-    './icons/icon-512.png'
+    './icons/icon-72.svg',
+    './icons/icon-96.svg',
+    './icons/icon-128.svg',
+    './icons/icon-144.svg',
+    './icons/icon-152.svg',
+    './icons/icon-192.svg',
+    './icons/icon-384.svg',
+    './icons/icon-512.svg'
 ];
 
 // Install: cache all essential assets

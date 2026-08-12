@@ -1,18 +1,19 @@
 // Service Worker for Retro Space Shooter PWA
-const CACHE_NAME = 'space-shooter-v3';
+const CACHE_NAME = 'space-shooter-v4';
+const BASE_PATH = '/Space-Shooter-Game/';
 const ASSETS_TO_CACHE = [
-    './',
-    './index.html',
-    './game.js',
-    './manifest.json',
-    './icons/icon-72.svg',
-    './icons/icon-96.svg',
-    './icons/icon-128.svg',
-    './icons/icon-144.svg',
-    './icons/icon-152.svg',
-    './icons/icon-192.svg',
-    './icons/icon-384.svg',
-    './icons/icon-512.svg'
+    BASE_PATH,
+    BASE_PATH + 'index.html',
+    BASE_PATH + 'game.js',
+    BASE_PATH + 'manifest.json',
+    BASE_PATH + 'icons/icon-72.svg',
+    BASE_PATH + 'icons/icon-96.svg',
+    BASE_PATH + 'icons/icon-128.svg',
+    BASE_PATH + 'icons/icon-144.svg',
+    BASE_PATH + 'icons/icon-152.svg',
+    BASE_PATH + 'icons/icon-192.svg',
+    BASE_PATH + 'icons/icon-384.svg',
+    BASE_PATH + 'icons/icon-512.svg'
 ];
 
 // Install: cache all essential assets
@@ -65,7 +66,7 @@ self.addEventListener('fetch', (event) => {
                     }
                     // Final fallback for navigation requests
                     if (event.request.destination === 'document') {
-                        return caches.match('./index.html');
+                        return caches.match(BASE_PATH + 'index.html');
                     }
                 });
             })

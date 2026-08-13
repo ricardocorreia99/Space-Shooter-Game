@@ -1,19 +1,20 @@
 // Service Worker for Retro Space Shooter PWA
-const CACHE_NAME = 'space-shooter-v6';
+const CACHE_NAME = 'space-shooter-v7';
 const BASE_PATH = '/Space-Shooter-Game/';
 const ASSETS_TO_CACHE = [
     BASE_PATH,
     BASE_PATH + 'index.html',
     BASE_PATH + 'game.js',
     BASE_PATH + 'manifest.json',
-    BASE_PATH + 'icons/icon-72.svg',
-    BASE_PATH + 'icons/icon-96.svg',
-    BASE_PATH + 'icons/icon-128.svg',
-    BASE_PATH + 'icons/icon-144.svg',
-    BASE_PATH + 'icons/icon-152.svg',
-    BASE_PATH + 'icons/icon-192.svg',
-    BASE_PATH + 'icons/icon-384.svg',
-    BASE_PATH + 'icons/icon-512.svg'
+    BASE_PATH + 'icons/icon-72.png',
+    BASE_PATH + 'icons/icon-96.png',
+    BASE_PATH + 'icons/icon-128.png',
+    BASE_PATH + 'icons/icon-144.png',
+    BASE_PATH + 'icons/icon-152.png',
+    BASE_PATH + 'icons/icon-192.png',
+    BASE_PATH + 'icons/icon-384.png',
+    BASE_PATH + 'icons/icon-512.png',
+    BASE_PATH + 'icons/apple-touch-icon.png'
 ];
 
 // Install: cache all essential assets

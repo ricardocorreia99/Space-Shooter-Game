@@ -17,6 +17,9 @@ const settings = {
     screenShakeEnabled: true
 };
 
+// Global game speed multiplier — increase this to make everything faster
+const GAME_SPEED = 1.0;
+
 // ============================================
 // SHIP CONFIGURATIONS
 // ============================================
@@ -243,10 +246,11 @@ class Player {
         this.wingmanFireTimer = 0;
     }
     update(keys) {
-        if (keys['ArrowLeft'] || keys['KeyA']) this.x -= this.speed;
-        if (keys['ArrowRight'] || keys['KeyD']) this.x += this.speed;
-        if (keys['ArrowUp'] || keys['KeyW']) this.y -= this.speed * 0.5;
-        if (keys['ArrowDown'] || keys['KeyS']) this.y += this.speed * 0.5;
+        const spd = this.speed * GAME_SPEED;
+        if (keys['ArrowLeft'] || keys['KeyA']) this.x -= spd;
+        if (keys['ArrowRight'] || keys['KeyD']) this.x += spd;
+        if (keys['ArrowUp'] || keys['KeyW']) this.y -= spd * 0.5;
+        if (keys['ArrowDown'] || keys['KeyS']) this.y += spd * 0.5;
         this.x = Math.max(this.width / 2, Math.min(W - this.width / 2, this.x));
         this.y = Math.max(H / 2, Math.min(H - this.height / 2, this.y));
         if (this.fireTimer > 0) this.fireTimer--;
@@ -993,15 +997,15 @@ class Game {
         if (this.waveWarningTimer > 0) this.waveWarningTimer--;
         this.floatingTexts = this.floatingTexts.filter(t => { t.y -= 1; t.life--; return t.life > 0; });
         if (this.keys['Space']) this.bullets.push(...this.player.shoot());
-        this.bullets = this.bullets.filter(b => { b.x += b.vx; b.y += b.vy; return b.y > -10 && b.x > -10 && b.x < W + 10; });
+        this.bullets = this.bullets.filter(b => { b.x += b.vx * GAME_SPEED; b.y += b.vy * GAME_SPEED; return b.y > -10 && b.x > -10 && b.x < W + 10; });
         // Move enemy bullets - apply time warp slow without changing their stored velocity
         const bulletTimeScale = this.timeWarpActive ? 0.3 : 1;
         this.enemyBullets = this.enemyBullets.filter(b => {
             // Store original velocity if not yet stored
             if (b.origVx === undefined) { b.origVx = b.vx; b.origVy = b.vy; }
-            // Always use original velocity for movement direction, apply time scale
-            b.x += b.origVx * bulletTimeScale;
-            b.y += b.origVy * bulletTimeScale;
+            // Always use original velocity for movement direction, apply time scale and game speed
+            b.x += b.origVx * bulletTimeScale * GAME_SPEED;
+            b.y += b.origVy * bulletTimeScale * GAME_SPEED;
             return b.y < H + 10 && b.y > -10 && b.x > -10 && b.x < W + 10;
         });
         if (this.levelTransition <= 0) { this.spawnTimer++; if (this.spawnTimer >= this.spawnRate) { this.spawnTimer = 0; this.spawnEnemy(); } }
@@ -1025,7 +1029,7 @@ class Game {
         const timeScale = this.timeWarpActive ? 0.3 : 1;
         this.enemies.forEach(e => {
             const origSpeed = e.speed;
-            e.speed *= timeScale;
+            e.speed *= timeScale * GAME_SPEED;
             e.update(this.player.x);
             e.speed = origSpeed;
             if (e.canShoot()) {
@@ -1201,8 +1205,8 @@ function setupToggle(id, settingKey) {
 setupToggle('toggleParticles', 'particlesEnabled');
 setupToggle('toggleShake', 'screenShakeEnabled');
 
-// Game loop - capped at 55fps for proper speed
-const TARGET_FPS = 55;
+// Game loop - capped at 65fps for proper speed
+const TARGET_FPS = 65;
 const FRAME_INTERVAL = 1000 / TARGET_FPS;
 let lastFrameTime = 0;
 

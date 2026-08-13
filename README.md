@@ -2,7 +2,7 @@
 
 A retro-style space shooter game built with vanilla HTML5 Canvas and JavaScript. Defend the galaxy from waves of alien invaders!
 
-![Space Shooter](icons/icon-192.svg)
+![Space Shooter](icons/icon-192.png)
 
 ## 🎮 Play
 
@@ -20,8 +20,9 @@ Open `index.html` in any modern browser or install it as a PWA on your mobile de
 - **Combo System** — Kill enemies quickly for score multipliers up to x5
 - **Boss Battles** — Every 5 levels features a boss with multiple attack patterns
 - **Retro Audio** — Procedurally generated sound effects and background music
-- **PWA Support** — Install on mobile devices for offline play
-- **Mobile Optimized** — Virtual joystick for full directional control, landscape-only mode
+- **PWA Support** — Install on mobile devices (iOS & Android) for offline play
+- **Mobile Optimized** — Virtual joystick for full directional control, landscape support
+- **iOS Compatible** — Full support for Apple touch icons and Add to Home Screen
 
 ## 🕹️ Controls
 
@@ -42,7 +43,7 @@ Open `index.html` in any modern browser or install it as a PWA on your mobile de
 - **Ultimate buttons** — Tap to activate unlocked abilities (top-right)
 - **⏸ button** — Pause game
 
-> 📱 **Note:** On mobile devices, the game requires landscape orientation for the best full-screen experience. A rotate overlay will prompt you to turn your device.
+> 📱 **Note:** On mobile devices, the game can be used with landscape orientation for the best full-screen experience.
 
 ## 🛸 Ships
 
@@ -101,6 +102,7 @@ Unlocked by reaching score thresholds:
 - **Web Audio API** — Procedural sound effects
 - **Service Worker** — Offline caching for PWA (network-first strategy)
 - **CSS3** — UI, responsive design, and animations
+- **Python/Pillow** — Icon generation (PNG for iOS compatibility)
 
 ## 📁 Project Structure
 
@@ -110,14 +112,15 @@ Space-Shooter-Game/
 ├── game.js             # Core game logic
 ├── sw.js               # Service worker for offline support
 ├── manifest.json       # PWA manifest
-├── icons/              # App icons (SVG)
-├── DEPLOY.md           # Deployment instructions
+├── apple-touch-icon.png # iOS home screen icon (180x180)
+├── icons/              # App icons (PNG + SVG)
+│   ├── icon-*.png      # PNG icons for iOS/PWA
+│   ├── icon-*.svg      # SVG source icons
+│   └── apple-touch-icon.png
+├── generate-pngs.py    # Script to regenerate PNG icons
+├── LICENSE             # Proprietary License (All Rights Reserved)
 └── README.md           # This file
 ```
-
-## 🚀 Deployment
-
-See [DEPLOY.md](DEPLOY.md) for deployment instructions.
 
 ### Quick Deploy to GitHub Pages
 
@@ -131,8 +134,12 @@ Then enable GitHub Pages in your repository settings (Settings → Pages → Sou
 
 ## 📄 License
 
-MIT License — feel free to use, modify, and distribute.
+**© 2026 Ricardo Correia. All Rights Reserved.**
+
+This project is proprietary software. No permission is granted to use, copy, modify, merge, publish, distribute, sublicense, or sell copies of this software without prior written permission from the copyright holder.
+
+Viewing the source code on GitHub does **not** constitute a license to use, copy, or distribute the software in any form.
+
+See the [LICENSE](LICENSE) file for the full license terms.
 
 ---
-
-Made with ❤️ and JavaScript

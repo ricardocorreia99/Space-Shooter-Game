@@ -1,5 +1,5 @@
 // Service Worker for Retro Space Shooter PWA
-const CACHE_NAME = 'space-shooter-v5';
+const CACHE_NAME = 'space-shooter-v6';
 const BASE_PATH = '/Space-Shooter-Game/';
 const ASSETS_TO_CACHE = [
     BASE_PATH,

@@ -8,19 +8,36 @@
     <meta name="apple-mobile-web-app-title" content="Space Shooter">
     <meta name="theme-color" content="#000000">
     <meta name="mobile-web-app-capable" content="yes">
+    <!-- iOS specific fixes -->
+    <meta name="format-detection" content="telephone=no">
     <link rel="manifest" href="manifest.json">
+    <!-- Apple touch icons (iOS requires PNG, fallback to SVG) -->
     <link rel="apple-touch-icon" href="icons/icon-192.svg">
+    <link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.svg">
+    <link rel="apple-touch-icon" sizes="144x144" href="icons/icon-144.svg">
+    <link rel="apple-touch-icon" sizes="128x128" href="icons/icon-128.svg">
+    <!-- iOS splash screen color -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <title>Retro Space Shooter</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            height: 100%;
+            height: -webkit-fill-available;
+        }
         body {
             background: #000;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            min-height: -webkit-fill-available;
             font-family: 'Courier New', monospace;
             overflow: hidden;
+            /* iOS: prevent bounce scrolling */
+            position: fixed;
+            width: 100%;
+            -webkit-overflow-scrolling: touch;
         }
         #gameContainer { position: relative; }
         canvas {
@@ -333,8 +350,13 @@
                 </div>
                 <div class="tab-content" id="tabHelp">
                     <div class="how-to-play" style="line-height:1.8; max-height:220px; overflow-y:auto;">
-                        <span>Controls:</span><br>
+                        <span>Controls (Desktop):</span><br>
                         ← → / A D : Move | ↑ ↓ / W S : Vertical | SPACE : Shoot | P / ⏸ : Pause<br><br>
+                        <span>Controls (Mobile):</span><br>
+                        🕹️ Joystick (left) : Move in all directions<br>
+                        🔴 Fire Button (right) : Hold to shoot<br>
+                        ⏸ Pause Button (top) : Tap to pause<br>
+                        ⏳🔥🌀 Ultimate Buttons (top-right) : Tap to activate<br><br>
                         <span>Power-ups (catch them flying across the screen!):</span><br>
                         🔫 Weapon Up (temp) | 🛡️ Shield (temp) | ⚡ Rapid Fire (temp) | 🛸 Wingman (temp) | ❤️ Extra Life | 💣 Bomb<br><br>
                         <span>Alien Bestiary:</span><br>
@@ -346,7 +368,7 @@
                         <span style="color:#aaa;">▪ Splitter</span> — A round blob with a split line. Breaks into smaller aliens on death.<br>
                         <span style="color:#aaa;">▪ Swarm</span> — Tiny triangles that hunt you in groups.<br>
                         <span style="color:#aaa;">▪ Boss</span> — A massive warship with multiple attack patterns.<br><br>
-                        <span>Ultimate Abilities (earned by score, press 1/2/3):</span><br>
+                        <span>Ultimate Abilities (earned by score):</span><br>
                         <span style="color:#a0f;">[1] ⏳ Time Warp</span> — Slows all enemies & bullets (unlocks at 500 pts)<br>
                         <span style="color:#f80;">[2] 🔥 Plasma Beam</span> — Devastating vertical beam (unlocks at 2000 pts)<br>
                         <span style="color:#80f;">[3] 🌀 Vortex</span> — Black hole pulls & damages enemies (unlocks at 5000 pts)<br><br>
@@ -510,7 +532,6 @@
                 object-fit: contain;
             }
             #gameContainer { width: 100vw; position: relative; }
-            #touchControls { display: flex; }
             #ui { font-size: 11px; top: 5px; left: 5px; right: 5px; }
             #powerUpTimers { top: 22px; left: 5px; }
             .timer-track { width: 50px; }
@@ -535,7 +556,7 @@
             #gameOverScreen h1 { font-size: 32px; }
             #finalScore { font-size: 24px; }
             #muteBtn { bottom: 145px; right: 5px; font-size: 10px; padding: 3px 6px; }
-            #pauseBtn { padding: 8px 14px; font-size: 20px; }
+            #pauseBtn { top: 28px; right: 5px; padding: 8px 14px; font-size: 20px; }
         }
 
         @media (max-width: 450px) {
@@ -547,9 +568,12 @@
             .touch-ult { width: 38px; height: 38px; font-size: 15px; }
         }
 
-        /* Safe area for notched phones */
+        /* Safe area for notched phones (iOS) */
         @supports (padding: env(safe-area-inset-bottom)) {
             #touchControls { padding-bottom: env(safe-area-inset-bottom); }
+            #ui { top: calc(5px + env(safe-area-inset-top)); }
+            #pauseBtn { top: calc(28px + env(safe-area-inset-top)); }
+            #gameContainer { padding-top: env(safe-area-inset-top); }
         }
 
         /* ===== LANDSCAPE OPTIMIZATION ===== */
@@ -590,11 +614,22 @@
 
         // ===== INSTALL PROMPT =====
         let deferredPrompt;
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
             document.getElementById('installPrompt').style.display = 'block';
         });
+
+        // iOS doesn't support beforeinstallprompt - show manual instructions
+        if (isIOS && !isInStandaloneMode) {
+            const installPrompt = document.getElementById('installPrompt');
+            installPrompt.querySelector('p').innerHTML = '📲 To install: tap <strong>Share</strong> ⬆️ then <strong>"Add to Home Screen"</strong>';
+            installPrompt.querySelector('#installBtn').style.display = 'none';
+            installPrompt.style.display = 'block';
+        }
 
         document.getElementById('installBtn').addEventListener('click', async () => {
             if (deferredPrompt) {
@@ -612,9 +647,11 @@
 
         // ===== MOBILE TOUCH CONTROLS =====
         const isMobile = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 850;
+        window.isMobileDevice = isMobile;
 
         if (isMobile) {
-            document.getElementById('touchControls').style.display = 'flex';
+            // Touch controls are hidden initially; shown only when game starts
+            document.getElementById('touchControls').style.display = 'none';
 
             // ===== VIRTUAL JOYSTICK =====
             const joystickZone = document.getElementById('joystickZone');

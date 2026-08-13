@@ -597,6 +597,9 @@ class Game {
         document.getElementById('gameOverScreen').classList.add('hidden');
         document.getElementById('pauseMenu').style.display = 'none';
         document.getElementById('pauseBtn').style.display = 'block';
+        // Show mobile touch controls when game starts
+        const tc = document.getElementById('touchControls');
+        if (tc && window.isMobileDevice) tc.style.display = 'flex';
         audio.startMusic();
     }
 
@@ -620,12 +623,18 @@ class Game {
         document.getElementById('gameOverScreen').classList.add('hidden');
         document.getElementById('pauseMenu').style.display = 'none';
         document.getElementById('pauseBtn').style.display = 'none';
+        // Hide mobile touch controls on home screen
+        const tc = document.getElementById('touchControls');
+        if (tc && window.isMobileDevice) tc.style.display = 'none';
         document.getElementById('homeHighScore').textContent = this.highScore;
     }
 
     gameOver() {
         this.state = 'gameover'; audio.stopMusic();
         document.getElementById('pauseBtn').style.display = 'none';
+        // Hide mobile touch controls on game over
+        const tc = document.getElementById('touchControls');
+        if (tc && window.isMobileDevice) tc.style.display = 'none';
         if (this.score > this.highScore) { this.highScore = this.score; localStorage.setItem('spaceShooterHighScore', this.highScore); }
         document.getElementById('gameOverScreen').classList.remove('hidden');
         document.getElementById('finalScore').textContent = `SCORE: ${this.score}`;
